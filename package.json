@@ -10,7 +10,10 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "element-ui": "^2.4.5",
-    "vue": "^2.6.11"
+    "jquery": "^3.5.1",
+    "swagger-client": "^3.10.6",
+    "vue": "^2.6.11",
+    "yargs": "^15.3.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.4.0",
