@@ -174,16 +174,19 @@ if (argv.itemdescription) {
 
                     var promise = Promise.resolve();
                     var interval = 1000;
+                    var index = 0;
+                    var all = items.size;
 
-                    items.forEach(item => {
+                    items.forEach((value,key) => {
 
                         promise = promise.then(function () {
-                            client.apis.Universe.get_universe_types_type_id({ "Accept-Language": "zh", language : "zh", type_id : item.type_id})
+                            client.apis.Universe.get_universe_types_type_id({ "Accept-Language": "zh", language : "zh", type_id : key})
                                 .then(
                                     ret => {
-                                        var r = JSON.parse(ret.body);
-                                        items[item.type_id].name = r.name;
-                                        items[item.type_id].description = r.description;
+                                        index++;
+                                        console.log(index + '/' + all);
+                                        value.name = ret.body.name;
+                                        value.description = ret.body.description;
                                     },
                                     reason => {
                                         console.log(element + ' failed on api call: ' + reason.response.data)
