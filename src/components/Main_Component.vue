@@ -31,12 +31,12 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="sell" label="吉他出售价(单个)" :formatter= "formatterNumber" sortable/>
-        <el-table-column prop="buy" label="吉他收购价(单个)" :formatter= "formatterNumber" sortable/>
-        <el-table-column prop="lp_rate_buy" label="吉他收购价星币每忠诚点(ISK/LP)" width="200" sortable/>
-        <el-table-column prop="lp_rate_sell" label="吉他出售价星币每忠诚点(ISK/LP)" width="200" sortable/>
-        <el-table-column prop="lp_rate_buy_all" label="如所需物品在吉他出售价购买，吉他收购价星币每忠诚点(ISK/LP)" width="250" sortable/>
-        <el-table-column prop="lp_rate_sell_all" label="如所需物品在吉他出售价购买，吉他出售价星币每忠诚点(ISK/LP)" width="250" sortable/>
+        <el-table-column prop="sell" label="吉他出售(单个)" :formatter= "formatterNumber" sortable/>
+        <el-table-column prop="buy" label="吉他收购(单个)" :formatter= "formatterNumber" sortable/>
+        <el-table-column prop="lp_rate_buy" label="吉他收购(ISK/LP)" width="200" sortable/>
+        <el-table-column prop="lp_rate_sell" label="吉他出售(ISK/LP)" width="200" sortable/>
+        <el-table-column prop="lp_rate_buy_all" label="如所需物品在吉他出售价购买，吉他收购(ISK/LP)" width="250" sortable/>
+        <el-table-column prop="lp_rate_sell_all" label="如所需物品在吉他出售价购买，吉他出售(ISK/LP)" width="250" sortable/>
         
       </el-table>
     </el-main>
@@ -86,12 +86,6 @@ export default {
           var item_main = vm.itemDescription.get(element.type_id);
           element.name = item_main.name;
           element.description = item_main.description;
-          element.buy = 0;
-          element.sell = 0;
-          element.lp_rate_buy = 0;
-          element.lp_rate_sell = 0;
-          element.lp_rate_buy_all = 0;
-          element.lp_rate_sell_all = 0;
 
           var main_promise = $.getJSON("http://localhost:8080/api/market/region/10000002/type/"+element.type_id+".json",function (m_data)
             {
@@ -106,8 +100,6 @@ export default {
             var item_request = vm.itemDescription.get(item.type_id);
             element.required_items[i].name = item_request.name;
             element.required_items[i].description = item_request.description;
-            element.required_items[i].buy = 0
-            element.required_items[i].sell = 0
 
             promiseList.push(vm.getReqItemData(item));
           }
