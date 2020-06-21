@@ -113,8 +113,9 @@ export default {
         url : "http://localhost:8080/api/quicklook?regionlimit=10000002&typeid=" + row.type_id,
         dataType: "xml",
         success: function(xml) {
-          var sellData = []
-          var buyData = []
+          vm.sellData.length = 0;
+          vm.buyData.length = 0;
+
           $(xml).find('sell_orders').find('order').each(function(){
             var order = {
               quantity : Number($(this).find('vol_remain').text()),
@@ -122,7 +123,7 @@ export default {
               orderDate : $(this).find('reported_time').text(),
               position : $(this).find('station_name').text()
             };
-            sellData.push(order);
+            vm.sellData.push(order);
           });
           $(xml).find('buy_orders').find("order").each(function(){
             var order = {
@@ -131,11 +132,8 @@ export default {
               orderDate : $(this).find('reported_time').text(),
               position : $(this).find('station_name').text()
             };
-            buyData.push(order);
+            vm.buyData.push(order);
           });
-
-          vm.sellData = sellData;
-          vm.buyData = buyData;
         }
       });
     },
