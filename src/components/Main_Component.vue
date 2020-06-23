@@ -27,9 +27,34 @@
       获取数据进度{{curUpdateIndex}}/{{tableData.length}}
       <el-table :data="tableData" style="width: 100%" v-on:expand-change="getItemOrder" stripe>
         <el-table-column type="expand">
-          <template>
+          <template slot-scope="scope">
+            兑换计算
+            <el-input-number v-model="getNumber" :min="1" label="兑换计算"></el-input-number>
+            <span style="margin-left: 10px"> 数量：{{scope.row.quantity * getNumber}} </span>
+            <span style="margin-left: 10px"> LP消耗：{{(scope.row.lp_cost * getNumber).toLocaleString()}} </span>
+            <span style="margin-left: 10px"> 吉他卖单收入：{{(scope.row.sell * getNumber * scope.row.quantity).toLocaleString()}} </span>
+            <span style="margin-left: 10px"> 吉他买单收入：{{(scope.row.buy * getNumber * scope.row.quantity).toLocaleString()}} </span>
+            <el-table :data="scope.row.required_items" style="width: 100%">
+              <el-table-column prop="name" label="名称" width="200" sortable></el-table-column>
+              <el-table-column prop="quantity" label="数量" width="80" sortable>
+                <template slot-scope="rowNumber">
+                  <span style="margin-left: 10px"> {{rowNumber.row.quantity * getNumber}} </span>
+                </template>
+              </el-table-column>
+              <el-table-column label="现有数量" width="300" sortable>
+                <template slot-scope="rowNumber">
+                  <el-input-number v-model="rowNumber.row.now_number" :min="0" ></el-input-number>
+                </template>
+              </el-table-column>
+              <el-table-column label="还需数量" width="120" sortable>
+                <template slot-scope="rowNumber">
+                  <span style="margin-left: 10px"> {{rowNumber.row.quantity * getNumber - rowNumber.row.now_number}} </span>
+                </template>
+              </el-table-column>
+            </el-table>
+            <br/>
             卖单
-            <el-table :data="sellData" style="width: 100%" stripe>
+            <el-table :data="sellData" style="width: 100%" stripe :default-sort = "{prop: 'price', order: 'ascending'}">
               <el-table-column prop="quantity" label="数量" width="80" sortable></el-table-column>
               <el-table-column prop="price" label="价格" :formatter="formatterNumber" sortable />
               <el-table-column prop="orderDate" label="订单日期"/>
@@ -37,7 +62,7 @@
             </el-table>
             <br/>
             买单
-            <el-table :data="buyData" style="width: 100%" stripe>
+            <el-table :data="buyData" style="width: 100%" stripe :default-sort = "{prop: 'price', order: 'descending'}">
               <el-table-column prop="quantity" label="数量" width="80" sortable></el-table-column>
               <el-table-column prop="price" label="价格" :formatter="formatterNumber" sortable />
               <el-table-column prop="orderDate" label="订单日期"/>
@@ -96,7 +121,8 @@ export default {
       loading: false,
       useCookie: true,
       sellData:[],
-      buyData:[]
+      buyData:[],
+      getNumber:1
     };
   },
 
@@ -207,6 +233,7 @@ export default {
               var item_request = vm.itemDescription.get(item.type_id);
               element.required_items[i].name = item_request.name;
               element.required_items[i].description = item_request.description;
+              element.required_items[i].now_number = 0;
 
               var isUseCookie_req = useCookie;
 
