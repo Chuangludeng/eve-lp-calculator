@@ -25,50 +25,125 @@
       ></el-switch>
       &nbsp;&nbsp;
       获取数据进度{{curUpdateIndex}}/{{tableData.length}}
+      <el-button @click="dialogCartVisible = true">打开购物车</el-button>
+
+      <el-dialog title="购物车" :visible.sync="dialogCartVisible">
+        <el-table :data="cart">
+          <el-table-column prop="name" label="名称" sortable width="250"></el-table-column>
+          <el-table-column label="兑换数量" width="250">
+            <template slot-scope="scope">
+              <el-input-number size="small" v-model="scope.row.getNumber"></el-input-number>
+            </template>
+          </el-table-column>
+          <el-table-column label="数量">
+            <template slot-scope="scope">
+              <span style="margin-left: 10px">{{(getTotalNubmer(scope.row)).toLocaleString()}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="LP消耗">
+            <template slot-scope="scope">
+              <span
+                style="margin-left: 10px"
+              >{{(scope.row.lp_cost * scope.row.getNumber).toLocaleString()}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="吉他卖单收入">
+            <template slot-scope="scope">
+              <span
+                style="margin-left: 10px"
+              >{{(scope.row.sell * scope.row.getNumber * scope.row.quantity).toLocaleString()}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="吉他买单收入">
+            <template slot-scope="scope">
+              <span
+                style="margin-left: 10px"
+              >{{(scope.row.buy * scope.row.getNumber * scope.row.quantity).toLocaleString()}}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+        物品需求统计
+        <el-table :data="cartRequest" style="width: 100%">
+          <el-table-column prop="name" label="名称" width="200" sortable></el-table-column>
+          <el-table-column prop="quantity" label="数量" width="80" sortable>
+            <template slot-scope="rowNumber">
+              <span style="margin-left: 10px">{{getTotalRequestNubmer(rowNumber)}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="现有数量" width="300" sortable>
+            <template slot-scope="rowNumber">
+              <el-input-number v-model="rowNumber.row.now_number" :min="0"></el-input-number>
+            </template>
+          </el-table-column>
+          <el-table-column label="还需数量" width="120" sortable>
+            <template slot-scope="rowNumber">
+              <span
+                style="margin-left: 10px"
+              >{{getTotalRequestNubmer(rowNumber) - rowNumber.row.now_number}}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-dialog>
+
       <el-table :data="tableData" style="width: 100%" v-on:expand-change="getItemOrder" stripe>
         <el-table-column type="expand">
           <template slot-scope="scope">
             兑换计算
             <el-input-number v-model="getNumber" :min="1" label="兑换计算"></el-input-number>
-            <span style="margin-left: 10px"> 数量：{{scope.row.quantity * getNumber}} </span>
-            <span style="margin-left: 10px"> LP消耗：{{(scope.row.lp_cost * getNumber).toLocaleString()}} </span>
-            <span style="margin-left: 10px"> 吉他卖单收入：{{(scope.row.sell * getNumber * scope.row.quantity).toLocaleString()}} </span>
-            <span style="margin-left: 10px"> 吉他买单收入：{{(scope.row.buy * getNumber * scope.row.quantity).toLocaleString()}} </span>
+            <span style="margin-left: 10px">数量：{{scope.row.quantity * getNumber}}</span>
+            <span
+              style="margin-left: 10px"
+            >LP消耗：{{(scope.row.lp_cost * getNumber).toLocaleString()}}</span>
+            <span
+              style="margin-left: 10px"
+            >吉他卖单收入：{{(scope.row.sell * getNumber * scope.row.quantity).toLocaleString()}}</span>
+            <span
+              style="margin-left: 10px"
+            >吉他买单收入：{{(scope.row.buy * getNumber * scope.row.quantity).toLocaleString()}}</span>
             <el-table :data="scope.row.required_items" style="width: 100%">
               <el-table-column prop="name" label="名称" width="200" sortable></el-table-column>
               <el-table-column prop="quantity" label="数量" width="80" sortable>
                 <template slot-scope="rowNumber">
-                  <span style="margin-left: 10px"> {{rowNumber.row.quantity * getNumber}} </span>
+                  <span style="margin-left: 10px">{{rowNumber.row.quantity * getNumber}}</span>
                 </template>
               </el-table-column>
               <el-table-column label="现有数量" width="300" sortable>
                 <template slot-scope="rowNumber">
-                  <el-input-number v-model="rowNumber.row.now_number" :min="0" ></el-input-number>
+                  <el-input-number v-model="rowNumber.row.now_number" :min="0"></el-input-number>
                 </template>
               </el-table-column>
               <el-table-column label="还需数量" width="120" sortable>
                 <template slot-scope="rowNumber">
-                  <span style="margin-left: 10px"> {{rowNumber.row.quantity * getNumber - rowNumber.row.now_number}} </span>
+                  <span
+                    style="margin-left: 10px"
+                  >{{rowNumber.row.quantity * getNumber - rowNumber.row.now_number}}</span>
                 </template>
               </el-table-column>
             </el-table>
-            <br/>
-            卖单
-            <el-table :data="sellData" style="width: 100%" stripe :default-sort = "{prop: 'price', order: 'ascending'}">
+            <br />卖单
+            <el-table
+              :data="sellData"
+              style="width: 100%"
+              stripe
+              :default-sort="{prop: 'price', order: 'ascending'}"
+            >
               <el-table-column prop="quantity" label="数量" width="80" sortable></el-table-column>
               <el-table-column prop="price" label="价格" :formatter="formatterNumber" sortable />
-              <el-table-column prop="orderDate" label="订单日期"/>
-              <el-table-column prop="position" label="位置"/>
+              <el-table-column prop="orderDate" label="订单日期" />
+              <el-table-column prop="position" label="位置" />
             </el-table>
-            <br/>
-            买单
-            <el-table :data="buyData" style="width: 100%" stripe :default-sort = "{prop: 'price', order: 'descending'}">
+            <br />买单
+            <el-table
+              :data="buyData"
+              style="width: 100%"
+              stripe
+              :default-sort="{prop: 'price', order: 'descending'}"
+            >
               <el-table-column prop="quantity" label="数量" width="80" sortable></el-table-column>
               <el-table-column prop="price" label="价格" :formatter="formatterNumber" sortable />
-              <el-table-column prop="orderDate" label="订单日期"/>
-              <el-table-column prop="position" label="位置"/>
+              <el-table-column prop="orderDate" label="订单日期" />
+              <el-table-column prop="position" label="位置" />
             </el-table>
-
           </template>
         </el-table-column>
         <el-table-column prop="name" label="名称" sortable width="250"></el-table-column>
@@ -100,6 +175,11 @@
           width="250"
           sortable
         />
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button size="mini" @click="handleAdd(scope.$index, scope.row)">加入购物车</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-main>
   </div>
@@ -120,46 +200,136 @@ export default {
       curUpdateIndex: 0,
       loading: false,
       useCookie: true,
-      sellData:[],
-      buyData:[],
-      getNumber:1
+      sellData: [],
+      buyData: [],
+      getNumber: 1,
+      cart: [],
+      cartRequest: [],
+      dialogCartVisible: false
     };
   },
 
   methods: {
+    getTotalRequestNubmer: function(requestItem) {
+      let ret = 0;
+      for(let i = 0;i < requestItem.row.requests.length;i++)
+      {
+        ret += requestItem.row.requests[i].quantity * requestItem.row.requests[i].main_item.getNumber;
+      }
+      return ret;
+    },
+
+    getTotalNubmer: function(row) {
+      return row.getNumber * row.quantity;
+    },
+
     formatterNumber: function(row, column, cellValue) {
       if (typeof cellValue == "undefined") return "";
       else return cellValue.toLocaleString();
     },
 
-    getItemOrder: function(row){
+    handleAdd: function(index, row) {
+      this.cart.push(row);
+
+      for(var i = 0;i<row.required_items.length;i++)
+      {
+
+        var found = null;
+        for(var j = 0; j < this.cartRequest.length; j++)
+        {
+          if(this.cartRequest[j].type_id == row.required_items[i].type_id)
+          {
+            found = this.cartRequest[j];
+            break;
+          }
+        }
+
+        let item = {
+          main_item : row,
+          quantity : row.required_items[i].quantity
+        }
+
+        this.$set(item, "getNumber", row.getNumber);
+
+        if(found != null)
+        {
+          found.requests.push(item)
+        }
+        else
+        {
+          found = {
+            name : row.required_items[i].name,
+            type_id : row.required_items[i].type_id,
+            requests : [item]
+          };
+
+          this.$set(found, "now_number", 0);
+
+          this.cartRequest.push(found);
+        }        
+      }
+    },
+
+    getItemOrder: function(row) {
       var vm = this;
       $.ajax({
-        type : "GET",
-        url : "http://localhost:8080/api/quicklook?regionlimit=10000002&typeid=" + row.type_id,
+        type: "GET",
+        url:
+          "http://localhost:8080/api/quicklook?regionlimit=10000002&typeid=" +
+          row.type_id,
         dataType: "xml",
         success: function(xml) {
           vm.sellData.length = 0;
           vm.buyData.length = 0;
 
-          $(xml).find('sell_orders').find('order').each(function(){
-            var order = {
-              quantity : Number($(this).find('vol_remain').text()),
-              price : Number($(this).find('price').text()),
-              orderDate : $(this).find('reported_time').text(),
-              position : $(this).find('station_name').text()
-            };
-            vm.sellData.push(order);
-          });
-          $(xml).find('buy_orders').find("order").each(function(){
-            var order = {
-              quantity : Number($(this).find('vol_remain').text()),
-              price : Number($(this).find('price').text()),
-              orderDate : $(this).find('reported_time').text(),
-              position : $(this).find('station_name').text()
-            };
-            vm.buyData.push(order);
-          });
+          $(xml)
+            .find("sell_orders")
+            .find("order")
+            .each(function() {
+              var order = {
+                quantity: Number(
+                  $(this)
+                    .find("vol_remain")
+                    .text()
+                ),
+                price: Number(
+                  $(this)
+                    .find("price")
+                    .text()
+                ),
+                orderDate: $(this)
+                  .find("reported_time")
+                  .text(),
+                position: $(this)
+                  .find("station_name")
+                  .text()
+              };
+              vm.sellData.push(order);
+            });
+          $(xml)
+            .find("buy_orders")
+            .find("order")
+            .each(function() {
+              var order = {
+                quantity: Number(
+                  $(this)
+                    .find("vol_remain")
+                    .text()
+                ),
+                price: Number(
+                  $(this)
+                    .find("price")
+                    .text()
+                ),
+                orderDate: $(this)
+                  .find("reported_time")
+                  .text(),
+                position: $(this)
+                  .find("station_name")
+                  .text()
+              };
+              vm.buyData.push(order);
+            });
         }
       });
     },
@@ -195,6 +365,7 @@ export default {
             var item_main = vm.itemDescription.get(element.type_id);
             element.name = item_main.name;
             element.description = item_main.description;
+            element.getNumber = 1;
 
             var isUseCookie = useCookie;
 
