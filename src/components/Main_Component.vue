@@ -197,6 +197,7 @@ export default {
       tableData: [],
       corporationData: null,
       itemDescription: null,
+      blueprintProduct: null,
       curUpdateIndex: 0,
       loading: false,
       useCookie: true,
@@ -272,11 +273,19 @@ export default {
 
     getItemOrder: function(row) {
       var vm = this;
+      
+      var product_id = row.type_id;
+      var product = vm.blueprintProduct.get(row.type_id);
+      if (product != undefined)
+      {
+        product_id=product.product;
+      }
+
       $.ajax({
         type: "GET",
         url:
           "http://localhost:8080/api/quicklook?regionlimit=10000002&typeid=" +
-          row.type_id,
+          product_id,
         dataType: "xml",
         success: function(xml) {
           vm.sellData.length = 0;
@@ -366,17 +375,24 @@ export default {
             element.name = item_main.name;
             element.description = item_main.description;
             element.getNumber = 1;
+            
+            var product_id = element.type_id;
+            var product = vm.blueprintProduct.get(element.type_id);
+            if (product != undefined)
+            {
+              product_id=product.product;
+            }
 
             var isUseCookie = useCookie;
 
-            if (window.localStorage.getItem(element.type_id) == null) {
+            if (window.localStorage.getItem(product_id) == null) {
               isUseCookie = false;
             }
 
             if (!isUseCookie) {
               var main_promise = $.getJSON(
                 "http://localhost:8080/api/market/region/10000002/type/" +
-                  element.type_id +
+                  product_id +
                   ".json",
                 function(m_data) {
                   element.buy = m_data.buy.max;
@@ -394,7 +410,7 @@ export default {
               );
               promiseList.push(main_promise);
             } else {
-              var price = JSON.parse(localStorage.getItem(element.type_id));
+              var price = JSON.parse(localStorage.getItem(product_id));
               element.buy = price.buy;
               element.sell = price.sell;
             }
@@ -490,12 +506,23 @@ export default {
           vm.itemDescription = new Map(data);
         }
       );
+    },
+
+    getBlueprintProduct: function() {
+      var vm = this;
+      $.getJSON(
+        process.env.BASE_URL + "LPStore/blueprint_product.json",
+        function(data) {
+          vm.blueprintProduct = new Map(data);
+        }
+      );
     }
   },
 
   created() {
     this.getItemDescription();
     this.getCorporationData();
+    this.getBlueprintProduct();
     // this.getLPStoreData(1000001)
   }
 };
