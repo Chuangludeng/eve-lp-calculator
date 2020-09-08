@@ -23,6 +23,12 @@
         active-color="#13ce66"
         inactive-color="#ff4949"
       ></el-switch>
+      <el-switch
+        active-text="显示蓝图"
+        v-model="showBlueprint"
+        active-color="#13ce66"
+        inactive-color="#ff4949"
+      ></el-switch>
       &nbsp;&nbsp;
       获取数据进度{{curUpdateIndex}}/{{tableData.length}}
       <el-button @click="dialogCartVisible = true">打开购物车</el-button>
@@ -201,6 +207,7 @@ export default {
       curUpdateIndex: 0,
       loading: false,
       useCookie: true,
+      showBlueprint: false,
       sellData: [],
       buyData: [],
       getNumber: 1,
@@ -377,10 +384,13 @@ export default {
             element.getNumber = 1;
             
             var product_id = element.type_id;
-            var product = vm.blueprintProduct.get(element.type_id);
-            if (product != undefined)
+            if(vm.showBlueprint)
             {
-              product_id=product.product;
+              var product = vm.blueprintProduct.get(element.type_id);
+              if (product != undefined)
+              {
+                product_id=product.product;
+              }
             }
 
             var isUseCookie = useCookie;
