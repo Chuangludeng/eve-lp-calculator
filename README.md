@@ -1,6 +1,8 @@
 # eve-lp-calculator
 国服EVE LP兑换计算器 价格基于国服市场中心
 
+目前已经迁移到 https://github.com/Chuangludeng/lp-calculator-electorn 下，使用electorn直接生成桌面应用程序。
+
 ## Project setup
 ```
 yarn install
